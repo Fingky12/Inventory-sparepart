@@ -21,5 +21,19 @@ conn.execute('''
     )
 ''')
 
+conn.execute('''
+    CREATE TABLE IF NOT EXISTS users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        username TEXT UNIQUE NOT NULL,
+        password TEXT NOT NULL
+    )
+''')
+
+# Tambah admin default (username: admin, password: admin123)
+try:
+    conn.execute("INSERT INTO users (username, password) VALUES (?, ?)", ("ongky", "ad8801"))
+except:
+    pass
+
 conn.close()
 print("Database created!")

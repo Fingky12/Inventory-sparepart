@@ -1,15 +1,39 @@
-from flask import Flask, render_template, request, redirect
+from flask import Flask, render_template, request, redirect, session, url_for
 import sqlite3
+from datetime import datetime
 
 app = Flask(__name__)
+app.secret_key = 'rahasia-super-aman-🔥'
 
 def get_db():
     conn = sqlite3.connect('database.db')
     conn.row_factory = sqlite3.Row
     return conn
 
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    error = None
+    if request.method == 'POST':
+        conn = get_db()
+        user = conn.execute('SELECT * FROM users WHERE username=? AND password=?',
+                            (request.form['username'], request.form['password'])).fetchone()
+        conn.close()
+        if user:
+            session['logged_in'] = True
+            return redirect('/')
+        else:
+            error = "❌ Username atau password salah!"
+    return render_template('login.html', error=error)
+
+@app.route('/logout')
+def logout():
+    session.pop('logged_in', None)
+    return redirect('/login')
+
 @app.route('/')
 def index():
+    if not session.get('logged_in'):
+        return redirect('/login')
     conn = get_db()
     parts = conn.execute('SELECT * FROM spareparts').fetchall()
     conn.close()
@@ -17,13 +41,16 @@ def index():
 
 @app.route('/add', methods=['GET', 'POST'])
 def add():
+    if not session.get('logged_in'):
+        return redirect('/login')
     if request.method == 'POST':
         nama = request.form['nama']
         stok = request.form['stok']
         satuan = request.form['satuan']
         harga = request.form['harga']
         conn = get_db()
-        conn.execute('INSERT INTO spareparts (nama, stok, satuan, harga) VALUES (?, ?, ?, ?)', (nama, stok, satuan, harga))
+        conn.execute('INSERT INTO spareparts (nama, stok, satuan, harga) VALUES (?, ?, ?, ?)',
+                     (nama, stok, satuan, harga))
         conn.commit()
         conn.close()
         return redirect('/')
@@ -31,13 +58,16 @@ def add():
 
 @app.route('/edit/<int:id>', methods=['GET', 'POST'])
 def edit(id):
+    if not session.get('logged_in'):
+        return redirect('/login')
     conn = get_db()
     if request.method == 'POST':
         nama = request.form['nama']
         stok = request.form['stok']
         satuan = request.form['satuan']
         harga = request.form['harga']
-        conn.execute('UPDATE spareparts SET nama=?, stok=?, satuan=?, harga=? WHERE id=?', (nama, stok, satuan, harga, id))
+        conn.execute('UPDATE spareparts SET nama=?, stok=?, satuan=?, harga=? WHERE id=?',
+                     (nama, stok, satuan, harga, id))
         conn.commit()
         conn.close()
         return redirect('/')
@@ -47,16 +77,18 @@ def edit(id):
 
 @app.route('/delete/<int:id>')
 def delete(id):
+    if not session.get('logged_in'):
+        return redirect('/login')
     conn = get_db()
     conn.execute('DELETE FROM spareparts WHERE id=?', (id,))
     conn.commit()
     conn.close()
     return redirect('/')
 
-from datetime import datetime
-
 @app.route('/transaction/<int:id>', methods=['GET', 'POST'])
 def transaction(id):
+    if not session.get('logged_in'):
+        return redirect('/login')
     conn = get_db()
     part = conn.execute('SELECT * FROM spareparts WHERE id=?', (id,)).fetchone()
     error = None
@@ -69,10 +101,7 @@ def transaction(id):
         if tipe == 'keluar' and jumlah > part['stok']:
             error = f"❌ Stok tidak mencukupi! (Stok saat ini: {part['stok']})"
         else:
-            # Hitung stok baru
             new_stok = part['stok'] + jumlah if tipe == 'masuk' else part['stok'] - jumlah
-
-            # Simpan update
             conn.execute('UPDATE spareparts SET stok=? WHERE id=?', (new_stok, id))
             conn.execute('INSERT INTO transactions (sparepart_id, jumlah, tipe, tanggal) VALUES (?, ?, ?, ?)',
                          (id, jumlah, tipe, tanggal))
@@ -81,10 +110,12 @@ def transaction(id):
             return redirect('/')
 
     conn.close()
-    return render_template('/transaction.html', part=part, error=error)
+    return render_template('transaction.html', part=part, error=error)
 
 @app.route('/history/<int:id>')
 def history(id):
+    if not session.get('logged_in'):
+        return redirect('/login')
     conn = get_db()
     part = conn.execute('SELECT * FROM spareparts WHERE id=?', (id,)).fetchone()
     riwayat = conn.execute('SELECT * FROM transactions WHERE sparepart_id=? ORDER BY tanggal DESC', (id,)).fetchall()
@@ -93,6 +124,8 @@ def history(id):
 
 @app.route('/quick-transaction', methods=['POST'])
 def quick_transaction():
+    if not session.get('logged_in'):
+        return redirect('/login')
     conn = get_db()
 
     sparepart_id = int(request.form['sparepart_id'])
@@ -120,6 +153,8 @@ def quick_transaction():
 
 @app.route('/dashboard')
 def dashboard():
+    if not session.get('logged_in'):
+        return redirect('/login')
     conn = get_db()
 
     total_masuk = conn.execute("SELECT SUM(jumlah) FROM transactions WHERE tipe='masuk'").fetchone()[0] or 0
@@ -160,7 +195,6 @@ def dashboard():
                            masuk_data=masuk_data,
                            keluar_labels=keluar_labels,
                            keluar_data=keluar_data)
-
 
 if __name__ == '__main__':
     app.run(debug=True)
