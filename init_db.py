@@ -1,39 +1,45 @@
 import sqlite3
 
 conn = sqlite3.connect('database.db')
+
+# Buat tabel spareparts
 conn.execute('''
-    CREATE TABLE IF NOT EXISTS spareparts (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        nama TEXT NOT NULL,
-        stok INTEGER NOT NULL,
-        satuan TEXT
-    )
+CREATE TABLE IF NOT EXISTS spareparts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nama TEXT NOT NULL,
+    stok INTEGER NOT NULL,
+    satuan TEXT NOT NULL,
+    harga INTEGER NOT NULL
+)
 ''')
 
+# Buat tabel transaksi
 conn.execute('''
-    CREATE TABLE IF NOT EXISTS transactions (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        sparepart_id INTEGER,
-        jumlah INTEGER,
-        tipe TEXT, -- 'masuk' / 'keluar'
-        tanggal TEXT,
-        FOREIGN KEY (sparepart_id) REFERENCES spareparts(id)
-    )
+CREATE TABLE IF NOT EXISTS transactions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    sparepart_id INTEGER,
+    jumlah INTEGER,
+    tipe TEXT,
+    tanggal TEXT
+)
 ''')
 
+# Buat tabel user
 conn.execute('''
-    CREATE TABLE IF NOT EXISTS users (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        username TEXT UNIQUE NOT NULL,
-        password TEXT NOT NULL
-    )
+CREATE TABLE IF NOT EXISTS users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT NOT NULL UNIQUE,
+    password TEXT NOT NULL
+)
 ''')
 
-# Tambah admin default (username: admin, password: admin123)
+# Tambah user admin default
 try:
-    conn.execute("INSERT INTO users (username, password) VALUES (?, ?)", ("ongky", "ad8801"))
+    conn.execute("INSERT INTO users (username, password) VALUES (?, ?)", ("ong", "ongky41101"))
 except:
     pass
 
+conn.commit()
 conn.close()
-print("Database created!")
+
+print("✅ Database berhasil dibuat " )
