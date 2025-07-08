@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Riwayat Transaksi</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <h1>📜 Riwayat: {{ part.nama }}</h1>
+    <a href="/">← Kembali</a>
+    <table>
+        <tr><th>Tanggal</th><th>Jumlah</th><th>Tipe</th></tr>
+        {% for t in riwayat %}
+        <tr>
+            <td>{{ t.tanggal }}</td>
+            <td>{{ t.jumlah }}</td>
+            <td>{{ t.tipe }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>

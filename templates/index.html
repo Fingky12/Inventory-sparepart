@@ -1,0 +1,61 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Inventory Sparepart</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <h1>📦 Inventory Sparepart</h1>
+
+    <div style="margin-bottom: 15px;">
+        <a href="/dashboard">📊 Dashboard</a> |
+        <a href="/add">➕ Tambah Item</a>
+    </div>
+
+    {% if message %}
+        <p style="color:green">{{ message }}</p>
+    {% elif error %}
+        <p style="color:red">{{ error }}</p>
+    {% endif %}
+
+    <table>
+        <tr><th>Nama</th><th>Stok</th><th>Satuan</th><th>Harga</th><th>Aksi</th></tr>
+        {% for part in parts %}
+        <tr>
+            <td>{{ part.nama }}</td>
+            <td>{{ part.stok }}</td>
+            <td>{{ part.satuan }}</td>
+            <td>Rp {{ "{:,}".format(part.harga) }}</td>
+            <td>
+                <a href="/edit/{{ part.id }}">Edit</a> |
+                <a href="/delete/{{ part.id }}">Hapus</a> |
+                <a href="/transaction/{{ part.id }}">Transaksi</a> |
+                <a href="/history/{{ part.id }}">Riwayat</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <h2>🔄 Transaksi Cepat</h2>
+    <form method="POST" action="/quick-transaction">
+        <label>Sparepart:</label>
+        <select name="sparepart_id" required>
+            {% for part in parts %}
+            <option value="{{ part.id }}">{{ part.nama }} (Stok: {{ part.stok }})</option>
+            {% endfor %}
+        </select><br>
+
+        <label>Jumlah:</label>
+        <input type="number" name="jumlah" required><br>
+
+        <label>Tipe:</label>
+        <select name="tipe">
+            <option value="masuk">Masuk</option>
+            <option value="keluar">Keluar</option>
+        </select><br>
+
+        <button type="submit">Simpan Transaksi</button>
+    </form>
+</body>
+</html>

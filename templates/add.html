@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Tambah Sparepart</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <h1>➕ Tambah Sparepart</h1>
+    <form method="POST">
+        <label>Nama Sparepart:</label>
+        <input type="text" name="nama" required><br>
+
+        <label>Stok:</label>
+        <input type="number" name="stok" required><br>
+
+        <label>Satuan:</label>
+        <input type="text" name="satuan"><br>
+
+        <!-- Tambahkan setelah input satuan -->
+        <label>Harga Satuan (Rp):</label>
+        <input type="number" name="harga" required><br>
+
+        <button type="submit">Simpan</button>
+        <a href="/">Kembali</a>
+    </form>
+</body>
+</html>

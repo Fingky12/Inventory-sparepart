@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>📊 Dashboard Transaksi</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <h1>📊 Dashboard Sparepart</h1>
+    <a href="/">← Kembali</a>
+
+    <div>
+        <h2>Total Transaksi</h2>
+        <p><strong>Barang Masuk:</strong> {{ total_masuk }}</p>
+        <p><strong>Barang Keluar:</strong> {{ total_keluar }}</p>
+    </div>
+
+    <div style="display: flex; gap: 40px; flex-wrap: wrap;">
+        <div style="width: 45%;">
+            <h2>📥 Top 5 Sparepart Masuk</h2>
+            <canvas id="chartMasuk"></canvas>
+        </div>
+        <div style="width: 45%;">
+            <h2>📤 Top 5 Sparepart Keluar</h2>
+            <canvas id="chartKeluar"></canvas>
+        </div>
+    </div>
+
+    <script>
+        const masukCtx = document.getElementById('chartMasuk').getContext('2d');
+        const keluarCtx = document.getElementById('chartKeluar').getContext('2d');
+
+        new Chart(masukCtx, {
+            type: 'pie',
+            data: {
+                labels: {{ masuk_labels|tojson }},
+                datasets: [{
+                    label: 'Sparepart Masuk',
+                    data: {{ masuk_data|tojson }},
+                    backgroundColor: ['#3498db','#2ecc71','#f1c40f','#e67e22','#e74c3c']
+                }]
+            }
+        });
+
+        new Chart(keluarCtx, {
+            type: 'bar',
+            data: {
+                labels: {{ keluar_labels|tojson }},
+                datasets: [{
+                    label: 'Sparepart Keluar',
+                    data: {{ keluar_data|tojson }},
+                    backgroundColor: '#e74c3c'
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
