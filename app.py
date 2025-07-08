@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, session, url_for
 import sqlite3
 from datetime import datetime
+from functools import wraps
 
 app = Flask(__name__)
 app.secret_key = 'rahasia-super-aman-🔥'
@@ -18,6 +19,15 @@ def is_valid_user():
     user = conn.execute("SELECT * FROM users WHERE username=?", (username,)).fetchone()
     conn.close()
     return user is not None
+
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not session.get('logged_in') or not is_valid_user():
+            session.clear()  # hapus session
+            return redirect('/login')
+        return f(*args, **kwargs)
+    return decorated_function
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -43,17 +53,7 @@ def logout():
     return redirect('/login')
     
 @app.route('/')
-from functools import wraps
-
-def login_required(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        if not session.get('logged_in') or not is_valid_user():
-            session.clear()  # hapus session
-            return redirect('/login')
-        return f(*args, **kwargs)
-    return decorated_function
-    
+@login_required
 def index():
     if not session.get('logged_in'):
         return redirect('/login')
@@ -63,17 +63,7 @@ def index():
     return render_template('index.html', parts=parts)
 
 @app.route('/add', methods=['GET', 'POST'])
-from functools import wraps
-
-def login_required(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        if not session.get('logged_in') or not is_valid_user():
-            session.clear()  # hapus session
-            return redirect('/login')
-        return f(*args, **kwargs)
-    return decorated_function
-    
+@login_required
 def add():
     if not session.get('logged_in'):
         return redirect('/login')
@@ -91,17 +81,7 @@ def add():
     return render_template('add.html')
 
 @app.route('/edit/<int:id>', methods=['GET', 'POST'])
-from functools import wraps
-
-def login_required(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        if not session.get('logged_in') or not is_valid_user():
-            session.clear()  # hapus session
-            return redirect('/login')
-        return f(*args, **kwargs)
-    return decorated_function
-    
+@login_required
 def edit(id):
     if not session.get('logged_in'):
         return redirect('/login')
@@ -121,17 +101,7 @@ def edit(id):
     return render_template('edit.html', part=part)
 
 @app.route('/delete/<int:id>')
-from functools import wraps
-
-def login_required(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        if not session.get('logged_in') or not is_valid_user():
-            session.clear()  # hapus session
-            return redirect('/login')
-        return f(*args, **kwargs)
-    return decorated_function
-    
+@login_required
 def delete(id):
     if not session.get('logged_in'):
         return redirect('/login')
@@ -142,17 +112,7 @@ def delete(id):
     return redirect('/')
 
 @app.route('/transaction/<int:id>', methods=['GET', 'POST'])
-from functools import wraps
-
-def login_required(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        if not session.get('logged_in') or not is_valid_user():
-            session.clear()  # hapus session
-            return redirect('/login')
-        return f(*args, **kwargs)
-    return decorated_function
-    
+@login_required
 def transaction(id):
     if not session.get('logged_in'):
         return redirect('/login')
@@ -180,17 +140,7 @@ def transaction(id):
     return render_template('transaction.html', part=part, error=error)
 
 @app.route('/history/<int:id>')
-from functools import wraps
-
-def login_required(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        if not session.get('logged_in') or not is_valid_user():
-            session.clear()  # hapus session
-            return redirect('/login')
-        return f(*args, **kwargs)
-    return decorated_function
-    
+@login_required
 def history(id):
     if not session.get('logged_in'):
         return redirect('/login')
@@ -201,17 +151,7 @@ def history(id):
     return render_template('history.html', part=part, riwayat=riwayat)
 
 @app.route('/quick-transaction', methods=['POST'])
-from functools import wraps
-
-def login_required(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        if not session.get('logged_in') or not is_valid_user():
-            session.clear()  # hapus session
-            return redirect('/login')
-        return f(*args, **kwargs)
-    return decorated_function
-    
+@login_required
 def quick_transaction():
     if not session.get('logged_in'):
         return redirect('/login')
@@ -241,17 +181,7 @@ def quick_transaction():
                                message=f"✅ Transaksi {tipe.upper()} berhasil untuk {part['nama']}")
 
 @app.route('/dashboard')
-from functools import wraps
-
-def login_required(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        if not session.get('logged_in') or not is_valid_user():
-            session.clear()  # hapus session
-            return redirect('/login')
-        return f(*args, **kwargs)
-    return decorated_function
-    
+@login_required
 def dashboard():
     if not session.get('logged_in'):
         return redirect('/login')
