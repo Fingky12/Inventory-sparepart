@@ -4,23 +4,33 @@
 <head>
     <title>Inventory Sparepart</title>
     <link rel="stylesheet" href="/static/style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body>
-    <h1>📦 Inventory Sparepart</h1>
-
-    <div style="margin-bottom: 15px;">
-        <a href="/dashboard">📊 Dashboard</a> |
+    <h1 class="fade-in">📦 Inventory Sparepart</h1>
+    <strong>👤 Login sebagai: {{ session['username'] }}</strong> 
+    <div class="menu-vertikal">
+        <a href="/dashboard">📊 Dashboard</a> 
         <a href="/add">➕ Tambah Item</a>
+        <a href="/ambil">📤 Ambil Sparepart</a> 
+        <a href="/riwayat-pengambilan">📜 Riwayat Pengambilan</a> 
+        <a href="/ubah-password">🔑 Ubah Password</a> 
+        <a href="/logout">🔓 Logout</a>
     </div>
-
     {% if message %}
         <p style="color:green">{{ message }}</p>
     {% elif error %}
         <p style="color:red">{{ error }}</p>
     {% endif %}
 
-    <table>
-        <tr><th>Nama</th><th>Stok</th><th>Satuan</th><th>Harga</th><th>Aksi</th></tr>
+    <table class="fade-in">
+        <tr>
+          <th>Nama</th>
+          <th>Stok</th>
+          <th>Satuan</th>
+          <th>Harga</th>
+          <th>Aksi</th>
+        </tr>
         {% for part in parts %}
         <tr>
             <td>{{ part.nama }}</td>
@@ -28,9 +38,9 @@
             <td>{{ part.satuan }}</td>
             <td>Rp {{ "{:,}".format(part.harga) }}</td>
             <td>
-                <a href="/edit/{{ part.id }}">Edit</a> |
-                <a href="/delete/{{ part.id }}">Hapus</a> |
-                <a href="/transaction/{{ part.id }}">Transaksi</a> |
+                <a href="/edit/{{ part.id }}">Edit</a> 
+                <a href="/delete/{{ part.id }}">Hapus</a> 
+                <a href="/transaction/{{ part.id }}">Transaksi</a> 
                 <a href="/history/{{ part.id }}">Riwayat</a>
             </td>
         </tr>
@@ -38,7 +48,7 @@
     </table>
 
     <h2>🔄 Transaksi Cepat</h2>
-    <form method="POST" action="/quick-transaction">
+    <form method="POST" action="/quick-transaction" class="fade-in">
         <label>Sparepart:</label>
         <select name="sparepart_id" required>
             {% for part in parts %}

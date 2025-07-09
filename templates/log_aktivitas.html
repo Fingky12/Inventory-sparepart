@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Log Aktivitas Admin</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <h1 class="fade-in">📝 Log Aktivitas Admin</h1>
+    <a href="/">← Kembali</a>
+    <table border="1" class="fade-in">
+        <tr><th>Waktu</th><th>Username</th><th>Aksi</th></tr>
+        {% for log in logs %}
+        <tr>
+            <td>{{ log.waktu }}</td>
+            <td>{{ log.username }}</td>
+            <td>{{ log.aksi }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>

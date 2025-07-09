@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Riwayat Pengambilan Sparepart</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+    <h1 class="fade-in">📜 Riwayat Pengambilan Sparepart</h1>
+    <a href="/">← Kembali</a>
+
+    <table border="1" cellpadding="5" cellspacing="0" class="fade-in">
+        <tr>
+            <th>Tanggal</th>
+            <th>Nama Sparepart</th>
+            <th>Jumlah</th>
+            <th>Pengambil</th>
+            <th>Keterangan</th>
+        </tr>
+        {% for row in rows %}
+        <tr>
+            <td>{{ row.tanggal }}</td>
+            <td>{{ row.nama }}</td>
+            <td>{{ row.jumlah }}</td>
+            <td>{{ row.pengambil or '-' }}</td>
+            <td>{{ row.keterangan or '-' }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>

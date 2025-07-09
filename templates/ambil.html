@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Ambil Sparepart</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+    <h1 class="fade-in">📤 Ambil Sparepart</h1>
+    <a href="/">← Kembali</a>
+    <a href="/riwayat-pengambilan">📜 Riwayat Pengambilan</a> 
+    <form method="POST" class="fade-in">
+        <label>🔧 Sparepart:</label><br>
+        <select name="sparepart_id" required>
+            {% for part in parts %}
+                <option value="{{ part.id }}">{{ part.nama }} (Stok: {{ part.stok }})</option>
+            {% endfor %}
+        </select><br><br>
+
+        <label>Jumlah:</label><br>
+        <input type="number" name="jumlah" required><br><br>
+
+        <label>Nama Pengambil:</label><br>
+        <input type="text" name="pengambil" required><br><br>
+
+        <label>Keterangan (opsional):</label><br>
+        <input type="text" name="keterangan"><br><br>
+
+        <button type="submit">✅ Simpan Pengambilan</button>
+    </form>
+</body>
+</html>

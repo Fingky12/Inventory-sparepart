@@ -3,15 +3,16 @@
 <head>
     <title>Transaksi Sparepart</title>
     <link rel="stylesheet" href="/static/style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body>
-    <h1>🔄 Transaksi: {{ part.nama }}</h1>
+    <h1 class="fade-in">🔄 Transaksi: {{ part.nama }}</h1>
         {% if message %}
           <p style="color: green;">{{ message }}</p>
         {% elif error %}
           <p style="color: red;">{{ error }}</p>
         {% endif %}
-    <form method="POST" action="/transaction/<int:id>">
+    <form method="POST" action="/transaction/<int:id>" class="fade-in">
       <label>Pilih Sparepart:</label>
         <select name="sparepart_id" required>
             {% for part in parts %}

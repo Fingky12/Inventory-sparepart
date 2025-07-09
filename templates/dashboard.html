@@ -4,18 +4,22 @@
     <title>📊 Dashboard Transaksi</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="/static/style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body>
-    <h1>📊 Dashboard Sparepart</h1>
-    <a href="/">← Kembali</a>
-
+    <h1 class="fade-in">📊 Dashboard Sparepart</h1>
+      <div>
+        <a href="/">← Kembali</a>
+        <a href="/ambil">📤 Ambil Sparepart</a> 
+        <a href="/riwayat-pengambilan">📜 Riwayat Pengambilan</a> 
+      </div>
     <div>
         <h2>Total Transaksi</h2>
         <p><strong>Barang Masuk:</strong> {{ total_masuk }}</p>
         <p><strong>Barang Keluar:</strong> {{ total_keluar }}</p>
     </div>
 
-    <div style="display: flex; gap: 40px; flex-wrap: wrap;">
+    <div class="menu-vetikal">
         <div style="width: 45%;">
             <h2>📥 Top 5 Sparepart Masuk</h2>
             <canvas id="chartMasuk"></canvas>

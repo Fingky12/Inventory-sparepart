@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, redirect, session, url_for
 import sqlite3
 from datetime import datetime
 from functools import wraps
+from datetime import datetime
 
 app = Flask(__name__)
 app.secret_key = 'rahasia-super-aman-🔥'
@@ -29,6 +30,17 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
+def simpan_log(username, aksi):
+    waktu = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    # 1. Simpan ke database
+    conn = get_db()
+    conn.execute("INSERT INTO log_aktivitas (username, aksi, waktu) VALUES (?, ?, ?)", (username, aksi, waktu))
+    conn.commit()
+    conn.close()
+    # 2. Simpan ke file log
+    with open("admin_log.log", "a") as f:
+        f.write(f"[{waktu}] {username.upper()} - {aksi}\n")
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     error = None
@@ -42,16 +54,53 @@ def login():
         if user:
             session['logged_in'] = True
             session['username'] = username  # simpan username aktif
+            simpan_log(username, 'Login berhasil')
             return redirect('/')
         else:
             error = "❌ Username atau password salah!"
     return render_template('login.html', error=error)
-    
+
 @app.route('/logout')
 def logout():
+    simpan_log(session.get('username'), 'Logout')
     session.clear()
     return redirect('/login')
-    
+
+@app.route('/log-aktivitas')
+@login_required
+def log_aktivitas():
+    conn = get_db()
+    logs = conn.execute('SELECT * FROM log_aktivitas ORDER BY waktu DESC').fetchall()
+    conn.close()
+    return render_template('log_aktivitas.html', logs=logs)
+
+@app.route('/ubah-password', methods=['GET', 'POST'])
+@login_required
+def ubah_password():
+    message = error = None
+
+    if request.method == 'POST':
+        current_user = session.get('username')
+        old_pw = request.form['old_password']
+        new_pw = request.form['new_password']
+        confirm_pw = request.form['confirm_password']
+
+        conn = get_db()
+        user = conn.execute("SELECT * FROM users WHERE username=? AND password=?", (current_user, old_pw)).fetchone()
+
+        if not user:
+            error = "❌ Password lama salah!"
+        elif new_pw != confirm_pw:
+            error = "❌ Konfirmasi password tidak cocok!"
+        else:
+            conn.execute("UPDATE users SET password=? WHERE username=?", (new_pw, current_user))
+            conn.commit()
+            message = "✅ Password berhasil diubah"
+
+        conn.close()
+        simpan_log(session['username'], "Ubah password admin")
+    return render_template('ubah_password.html', message=message, error=error)
+
 @app.route('/')
 @login_required
 def index():
@@ -77,6 +126,7 @@ def add():
                      (nama, stok, satuan, harga))
         conn.commit()
         conn.close()
+        simpan_log(session['username'], f"Tambah item: {nama} ({stok} {satuan})")
         return redirect('/')
     return render_template('add.html')
 
@@ -95,6 +145,7 @@ def edit(id):
                      (nama, stok, satuan, harga, id))
         conn.commit()
         conn.close()
+        simpan_log(session['username'], f"Edit item ID {id}: jadi {nama}, stok {stok}")
         return redirect('/')
     part = conn.execute('SELECT * FROM spareparts WHERE id=?', (id,)).fetchone()
     conn.close()
@@ -109,6 +160,7 @@ def delete(id):
     conn.execute('DELETE FROM spareparts WHERE id=?', (id,))
     conn.commit()
     conn.close()
+    simpan_log(session['username'], f"Hapus item ID {id}")
     return redirect('/')
 
 @app.route('/transaction/<int:id>', methods=['GET', 'POST'])
@@ -134,6 +186,7 @@ def transaction(id):
                          (id, jumlah, tipe, tanggal))
             conn.commit()
             conn.close()
+            simpan_log(session['username'], f"Transaksi {tipe} ID {id}: {jumlah} unit")
             return redirect('/')
 
     conn.close()
@@ -176,9 +229,55 @@ def quick_transaction():
                      (sparepart_id, jumlah, tipe, tanggal))
         conn.commit()
         conn.close()
+        simpan_log(session['username'], f"Quick Transaksi {tipe} untuk ID {sparepart_id}: {jumlah}")
         parts = get_db().execute('SELECT * FROM spareparts').fetchall()
         return render_template('index.html', parts=parts,
                                message=f"✅ Transaksi {tipe.upper()} berhasil untuk {part['nama']}")
+
+@app.route('/ambil', methods=['GET', 'POST'])
+@login_required
+def ambil():
+    conn = get_db()
+    parts = conn.execute("SELECT * FROM spareparts").fetchall()
+
+    if request.method == 'POST':
+        sparepart_id = request.form['sparepart_id']
+        jumlah = int(request.form['jumlah'])
+        pengambil = request.form['pengambil']
+        keterangan = request.form['keterangan']
+
+        # Kurangi stok
+        conn.execute("UPDATE spareparts SET stok = stok - ? WHERE id = ?", (jumlah, sparepart_id))
+
+        # Simpan transaksi keluar
+        tanggal = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        conn.execute('''
+            INSERT INTO transactions (sparepart_id, jumlah, tipe, tanggal, pengambil, keterangan)
+            VALUES (?, ?, 'keluar', ?, ?, ?)
+        ''', (sparepart_id, jumlah, tanggal, pengambil, keterangan))
+
+        conn.commit()
+        conn.close()
+
+        simpan_log(session['username'], f"Ambil sparepart ID {sparepart_id} oleh {pengambil} sebanyak {jumlah}")
+        return redirect('/ambil')  # kembali ke form ambil
+
+    conn.close()
+    return render_template('ambil.html', parts=parts)
+    
+@app.route('/riwayat-pengambilan')
+@login_required
+def riwayat_pengambilan():
+    conn = get_db()
+    rows = conn.execute('''
+        SELECT t.*, s.nama FROM transactions t
+        JOIN spareparts s ON t.sparepart_id = s.id
+        WHERE t.tipe = 'keluar'
+        ORDER BY t.tanggal DESC
+    ''').fetchall()
+    conn.close()
+    return render_template('riwayat_pengambilan.html', rows=rows)
+
 
 @app.route('/dashboard')
 @login_required

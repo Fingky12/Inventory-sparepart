@@ -35,9 +35,18 @@ CREATE TABLE IF NOT EXISTS users (
 
 # Tambah user admin default
 try:
-    conn.execute("INSERT INTO users (username, password) VALUES (?, ?)", ("ong", "ongky41101"))
+    conn.execute("INSERT INTO users (username, password) VALUES (?, ?)", ("ongky", "ong41101"))
 except:
     pass
+
+conn.execute('''
+CREATE TABLE IF NOT EXISTS log_aktivitas (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT,
+    aksi TEXT,
+    waktu TEXT
+)
+''')
 
 conn.commit()
 conn.close()

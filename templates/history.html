@@ -3,11 +3,12 @@
 <head>
     <title>Riwayat Transaksi</title>
     <link rel="stylesheet" href="/static/style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body>
-    <h1>📜 Riwayat: {{ part.nama }}</h1>
+    <h1 class="fade-in">📜 Riwayat: {{ part.nama }}</h1>
     <a href="/">← Kembali</a>
-    <table>
+    <table class="fade-in">
         <tr><th>Tanggal</th><th>Jumlah</th><th>Tipe</th></tr>
         {% for t in riwayat %}
         <tr>
