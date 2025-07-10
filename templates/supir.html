@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="stylesheet" href="/static/style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+  </head>
+  <body>
+      <h1 class="fade-in">🧑‍✈️ Daftar Supir & Truk</h1>
+      <div class="menu-vertikal">
+        <a href="/">Kembali</a>
+      </div>
+        <form method="POST">
+          <input type="text" name="nama" placeholder="Nama Supir" required>
+          <input type="text" name="nopol" placeholder="No. Polisi Truk" required>
+          <button type="submit">Tambah Supir</button>
+        </form>
+    <table border="1" cellpadding="5" cellspacing="0" class="fade-in">
+        <tr><th>Nama Supir</th><th>Nopol</th></tr>
+        {% for row in data %}
+        <tr>
+          <td>{{ row.nama_supir }}</td>
+          <td>{{ row.nopol }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+  </body>
+</html>

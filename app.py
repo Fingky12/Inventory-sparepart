@@ -163,46 +163,6 @@ def delete(id):
     simpan_log(session['username'], f"Hapus item ID {id}")
     return redirect('/')
 
-@app.route('/transaction/<int:id>', methods=['GET', 'POST'])
-@login_required
-def transaction(id):
-    if not session.get('logged_in'):
-        return redirect('/login')
-    conn = get_db()
-    part = conn.execute('SELECT * FROM spareparts WHERE id=?', (id,)).fetchone()
-    error = None
-
-    if request.method == 'POST':
-        jumlah = int(request.form['jumlah'])
-        tipe = request.form['tipe']
-        tanggal = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
-        if tipe == 'keluar' and jumlah > part['stok']:
-            error = f"❌ Stok tidak mencukupi! (Stok saat ini: {part['stok']})"
-        else:
-            new_stok = part['stok'] + jumlah if tipe == 'masuk' else part['stok'] - jumlah
-            conn.execute('UPDATE spareparts SET stok=? WHERE id=?', (new_stok, id))
-            conn.execute('INSERT INTO transactions (sparepart_id, jumlah, tipe, tanggal) VALUES (?, ?, ?, ?)',
-                         (id, jumlah, tipe, tanggal))
-            conn.commit()
-            conn.close()
-            simpan_log(session['username'], f"Transaksi {tipe} ID {id}: {jumlah} unit")
-            return redirect('/')
-
-    conn.close()
-    return render_template('transaction.html', part=part, error=error)
-
-@app.route('/history/<int:id>')
-@login_required
-def history(id):
-    if not session.get('logged_in'):
-        return redirect('/login')
-    conn = get_db()
-    part = conn.execute('SELECT * FROM spareparts WHERE id=?', (id,)).fetchone()
-    riwayat = conn.execute('SELECT * FROM transactions WHERE sparepart_id=? ORDER BY tanggal DESC', (id,)).fetchall()
-    conn.close()
-    return render_template('history.html', part=part, riwayat=riwayat)
-
 @app.route('/quick-transaction', methods=['POST'])
 @login_required
 def quick_transaction():
@@ -239,31 +199,33 @@ def quick_transaction():
 def ambil():
     conn = get_db()
     parts = conn.execute("SELECT * FROM spareparts").fetchall()
-
+    supir_list = conn.execute("SELECT * FROM supir_truk").fetchall()
+      
     if request.method == 'POST':
         sparepart_id = request.form['sparepart_id']
         jumlah = int(request.form['jumlah'])
-        pengambil = request.form['pengambil']
+        supir_id = request.form['supir_id']
         keterangan = request.form['keterangan']
-
-        # Kurangi stok
+      
+        # Ambil nama supir & nopol dari DB
+        supir = conn.execute("SELECT * FROM supir_truk WHERE id = ?", (supir_id,)).fetchone()
+        pengambil = f"{supir['nama_supir']} ({supir['nopol']})"
+      
+        # Update stok + simpan transaksi
         conn.execute("UPDATE spareparts SET stok = stok - ? WHERE id = ?", (jumlah, sparepart_id))
-
-        # Simpan transaksi keluar
         tanggal = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         conn.execute('''
             INSERT INTO transactions (sparepart_id, jumlah, tipe, tanggal, pengambil, keterangan)
             VALUES (?, ?, 'keluar', ?, ?, ?)
         ''', (sparepart_id, jumlah, tanggal, pengambil, keterangan))
-
+      
         conn.commit()
         conn.close()
-
         simpan_log(session['username'], f"Ambil sparepart ID {sparepart_id} oleh {pengambil} sebanyak {jumlah}")
-        return redirect('/ambil')  # kembali ke form ambil
-
+        return redirect('/ambil')
+      
     conn.close()
-    return render_template('ambil.html', parts=parts)
+    return render_template('ambil.html', parts=parts, supir_list=supir_list)
     
 @app.route('/riwayat-pengambilan')
 @login_required
@@ -324,6 +286,40 @@ def dashboard():
                            masuk_data=masuk_data,
                            keluar_labels=keluar_labels,
                            keluar_data=keluar_data)
+
+@app.route('/supir', methods=['GET', 'POST'])
+@login_required
+def supir():
+    conn = get_db()
+
+    if request.method == 'POST':
+        nama = request.form['nama']
+        nopol = request.form['nopol']
+        conn.execute("INSERT INTO supir_truk (nama_supir, nopol) VALUES (?, ?)", (nama, nopol))
+        conn.commit()
+        simpan_log(session['username'], f"Tambah supir: {nama} - {nopol}")
+        return redirect('/supir')
+
+    data = conn.execute("SELECT * FROM supir_truk").fetchall()
+    conn.close()
+    return render_template('supir.html', data=data)
+
+@app.route('/supir', methods=['GET', 'POST'])
+@login_required
+def tambah_supir():
+    conn = get_db()
+    if request.method == 'POST':
+        nama = request.form['nama']
+        nopol = request.form['nopol']
+        conn.execute("INSERT INTO supir_truk (nama_supir, nopol) VALUES (?, ?)", (nama, nopol))
+        conn.commit()
+        conn.close()
+        simpan_log(session['username'], f"Tambah supir: {nama} ({nopol})")
+        return redirect('/supir')
+    
+    data = conn.execute("SELECT * FROM supir_truk").fetchall()
+    conn.close()
+    return render_template('supir.html', data=data)
 
 if __name__ == '__main__':
     app.run(debug=True)

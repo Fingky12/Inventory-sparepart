@@ -52,7 +52,7 @@ a {
     display: inline-block;
     margin: 5px 10px 10px 0;
     padding: 6px 12px;
-    background-color: #3498db;
+    background-color: #f23300;
     color: white;
     border-radius: 4px;
     text-decoration: none;
@@ -61,8 +61,8 @@ a {
 }
 
 a:hover {
-    background-color: #2980b9;
-    color: darkblue;
+    background-color: #c42900;
+    color: #8b0000;
 }
 
 table {
@@ -102,30 +102,29 @@ select {
     white-space: nowrap;
     border-collapse: collapse;
   }
+  
   .menu-vertikal {
     display: flex;
     flex-direction: column;
-    align-items: stretch;
+    align-items: ;
     gap: 10px;
     margin-bottom: 20px;
     max-width: 300px;
     margin-left: auto;
     margin-right: auto;
-}
-
+  }
   .menu-vertikal a {
-    background-color: #007BFF;
+    background-color: #f23300;
     color: white;
     text-align: center;
     padding: 10px;
     text-decoration: none;
-    border-radius: 5px;
+    border-radius: 3px;
     transition: background-color 0.3s ease;
-}
-
+  }
   .menu-vertikal a:hover {
-    background-color: #0056b3;
-}
+    background-color: #c42900;
+  }
   
 }
 

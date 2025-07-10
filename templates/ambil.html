@@ -6,9 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body>
-    <h1 class="fade-in">📤 Ambil Sparepart</h1>
-    <a href="/">← Kembali</a>
-    <a href="/riwayat-pengambilan">📜 Riwayat Pengambilan</a> 
+    <div class="menu-vertikal">
+      <h1 class="fade-in">📤 Ambil Sparepart</h1>
+      <a href="/">← Kembali</a>
+      <a href="/riwayat-pengambilan">📜 Riwayat Pengambilan</a> 
+    </div>
     <form method="POST" class="fade-in">
         <label>🔧 Sparepart:</label><br>
         <select name="sparepart_id" required>
@@ -16,16 +18,22 @@
                 <option value="{{ part.id }}">{{ part.nama }} (Stok: {{ part.stok }})</option>
             {% endfor %}
         </select><br><br>
-
+        
         <label>Jumlah:</label><br>
         <input type="number" name="jumlah" required><br><br>
-
+        
         <label>Nama Pengambil:</label><br>
         <input type="text" name="pengambil" required><br><br>
-
+        
         <label>Keterangan (opsional):</label><br>
         <input type="text" name="keterangan"><br><br>
-
+        
+        <label>Supir & Nopol:</label><br>
+        <select name="supir_id" required>
+          {% for s in supir_list %}
+            <option value="{{ s.id }}">{{ s.nama_supir }} - {{ s.nopol }}</option>
+          {% endfor %}
+        </select><br><br>
         <button type="submit">✅ Simpan Pengambilan</button>
     </form>
 </body>

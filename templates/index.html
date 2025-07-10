@@ -8,10 +8,12 @@
 </head>
 <body>
     <h1 class="fade-in">📦 Inventory Sparepart</h1>
-    <strong>👤 Login sebagai: {{ session['username'] }}</strong> 
+    <strong>👤 Login sebagai: {{ session['username'] }}</strong>
     <div class="menu-vertikal">
         <a href="/dashboard">📊 Dashboard</a> 
         <a href="/add">➕ Tambah Item</a>
+        
+        <a href="/supir">🧑‍✈️ Input Supir</a>
         <a href="/ambil">📤 Ambil Sparepart</a> 
         <a href="/riwayat-pengambilan">📜 Riwayat Pengambilan</a> 
         <a href="/ubah-password">🔑 Ubah Password</a> 
@@ -40,32 +42,9 @@
             <td>
                 <a href="/edit/{{ part.id }}">Edit</a> 
                 <a href="/delete/{{ part.id }}">Hapus</a> 
-                <a href="/transaction/{{ part.id }}">Transaksi</a> 
-                <a href="/history/{{ part.id }}">Riwayat</a>
             </td>
         </tr>
         {% endfor %}
     </table>
-
-    <h2>🔄 Transaksi Cepat</h2>
-    <form method="POST" action="/quick-transaction" class="fade-in">
-        <label>Sparepart:</label>
-        <select name="sparepart_id" required>
-            {% for part in parts %}
-            <option value="{{ part.id }}">{{ part.nama }} (Stok: {{ part.stok }})</option>
-            {% endfor %}
-        </select><br>
-
-        <label>Jumlah:</label>
-        <input type="number" name="jumlah" required><br>
-
-        <label>Tipe:</label>
-        <select name="tipe">
-            <option value="masuk">Masuk</option>
-            <option value="keluar">Keluar</option>
-        </select><br>
-
-        <button type="submit">Simpan Transaksi</button>
-    </form>
 </body>
 </html>
